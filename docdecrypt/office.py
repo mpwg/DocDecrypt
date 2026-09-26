@@ -11,7 +11,7 @@ import tempfile
 from pathlib import Path
 
 import msoffcrypto
-from msoffcrypto.exceptions import InvalidKeyError
+from msoffcrypto.exceptions import DecryptionError, InvalidKeyError
 
 
 VENDORED_OFFICE2JOHN = Path(__file__).parent / "_vendor" / "office2john.py"
@@ -64,7 +64,7 @@ def decrypt_to(path: Path, destination: Path, password: str) -> bool:
             try:
                 office.load_key(password=password)
                 office.decrypt(decrypted)
-            except (InvalidKeyError, ValueError):
+            except (InvalidKeyError, DecryptionError, ValueError):
                 return False
         if is_encrypted(temp):
             raise UnsupportedDocumentError("Entschlüsseltes Ergebnis ist weiterhin verschlüsselt")

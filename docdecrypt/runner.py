@@ -166,6 +166,7 @@ def run(
     output_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
     private_dir = output_dir / ".docdecrypt"
     private_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+    private_dir.chmod(0o700)
     downloaded, errors = available_wordlists(private_dir / "lists", download)
     for error in errors:
         print(f"Wortliste nicht verfügbar: {error}")

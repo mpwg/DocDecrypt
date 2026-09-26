@@ -21,6 +21,7 @@ class Source:
     url: str
     sha256: str
     compressed: bool = False
+    content_sha256: str | None = None
 
 
 SOURCES = (
@@ -39,6 +40,7 @@ SOURCES = (
         f"https://gitlab.com/kalilinux/packages/wordlists/-/raw/{KALI_REV}/rockyou.txt.gz",
         "ded2d962815e1256df8f3a0d25173c4b21b6eee636117c36999246725a6d8f9f",
         compressed=True,
+        content_sha256="16035fea7742cb0561c513de1d946eda5716d7de294e6c732449740096686173",
     ),
 )
 
@@ -49,10 +51,13 @@ def available_wordlists(cache: Path, download: bool) -> tuple[list[Path], list[s
     errors: list[str] = []
     for source in SOURCES:
         target = cache / source.name
-        if target.is_file() and target.stat().st_size:
+        expected = source.content_sha256 or source.sha256
+        if target.is_file() and _sha256(target) == expected:
             found.append(target)
             continue
         if not download:
+            if target.exists():
+                errors.append(f"{source.name}: lokale Prüfsumme stimmt nicht")
             continue
         try:
             _fetch(source, target)
@@ -60,6 +65,14 @@ def available_wordlists(cache: Path, download: bool) -> tuple[list[Path], list[s
         except (OSError, ValueError, EOFError) as exc:
             errors.append(f"{source.name}: {exc}")
     return found, errors
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        while block := stream.read(1024 * 1024):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def _fetch(source: Source, target: Path) -> None:
