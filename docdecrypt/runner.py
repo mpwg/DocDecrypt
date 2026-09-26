@@ -65,6 +65,11 @@ def _known_passwords(state_dir: Path) -> list[str]:
     return passwords
 
 
+def _print_password(path: Path, password: str) -> None:
+    # JSON maskiert Zeilenumbrüche und Steuerzeichen, ohne das Passwort zu verändern.
+    print(f"Passwort für {path.name}: {json.dumps(password, ensure_ascii=False)}")
+
+
 def _process_file(
     path: Path, output_dir: Path, private_dir: Path, own_lists: list[Path],
     downloaded: list[Path], seconds_per_file: float,
@@ -82,6 +87,8 @@ def _process_file(
         return True
     if state.get("status") == "entschlüsselt" and destination.is_file():
         print(f"{path.name}: bereits entschlüsselt")
+        if isinstance(state.get("password"), str):
+            _print_password(path, state["password"])
         return True
     deadline = time.monotonic() + seconds_per_file
     for password in _known_passwords(private_dir / "state"):
@@ -89,6 +96,7 @@ def _process_file(
             state.update({"status": "entschlüsselt", "password": password})
             _save_state(state_file, state)
             print(f"{path.name}: mit bekanntem Passwort entschlüsselt")
+            _print_password(path, password)
             return True
     hash_value, mode = extract_hash(path)
     hash_file = private_dir / f"{file_id}.hash"
@@ -129,6 +137,7 @@ def _process_file(
                 state.update({"status": "entschlüsselt", "password": found})
                 _save_state(state_file, state)
                 print(f"{path.name}: entschlüsselt")
+                _print_password(path, found)
                 return True
             else:
                 print("  Kandidat konnte das Dokument nicht entschlüsseln")

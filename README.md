@@ -46,6 +46,12 @@ Word-Dateien, Listen und Sitzungsdateien von Git aus. Für selbst gewählte
 Ausgabeordner innerhalb anderer Repositories ist deren Git-Konfiguration
 ebenfalls zu prüfen.
 
+Ein gefundenes Passwort wird für jede betroffene Datei im Terminal ausgegeben,
+auch wenn eine bereits entschlüsselte Datei später erneut verarbeitet wird.
+Die Anführungszeichen gehören zur Darstellung; Steuerzeichen werden maskiert.
+Terminalausgaben können Passwörter enthalten und sollten nicht öffentlich geteilt
+werden.
+
 Rückgabewert `0` bedeutet, dass alle Dateien unverschlüsselt im Ausgabeordner
 liegen. `1` bedeutet, dass mindestens eine Datei noch nicht entschlüsselt wurde.
 `2` bezeichnet einen Eingabe- oder Werkzeugfehler.

@@ -7,6 +7,7 @@ import json
 import tempfile
 import unittest
 import zipfile
+from contextlib import redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
@@ -74,7 +75,11 @@ class DocumentTests(unittest.TestCase):
         state = output / ".docdecrypt" / "state"
         state.mkdir(parents=True)
         (state / "known.json").write_text(json.dumps({"completed": [], "password": "Geheim123!"}))
-        self.assertEqual(run(self.input_dir, output, [], 1, False), 0)
+        printed = io.StringIO()
+        with redirect_stdout(printed):
+            self.assertEqual(run(self.input_dir, output, [], 1, False), 0)
+            self.assertEqual(run(self.input_dir, output, [], 1, False), 0)
+        self.assertEqual(printed.getvalue().count('Passwort für locked.docx: "Geheim123!"'), 2)
         self.assertEqual((output / "plain.docx").read_bytes(), self.plain.read_bytes())
         self.assertFalse(is_encrypted(output / "locked.docx"))
         statuses = [json.loads(p.read_text()) for p in state.glob("*.json")]
@@ -82,14 +87,16 @@ class DocumentTests(unittest.TestCase):
 
     def test_pause_then_resume_same_stage(self) -> None:
         output = self.root / "output"
+        printed = io.StringIO()
         with patch("docdecrypt.runner.execute_stage", side_effect=[
             (None, False, None), ("Geheim123!", True, None),
-        ]) as attack:
+        ]) as attack, redirect_stdout(printed):
             self.assertEqual(run(self.input_dir, output, [], 30, False), 1)
             states = [json.loads(p.read_text()) for p in (output / ".docdecrypt" / "state").glob("*.json")]
             self.assertTrue(any(item.get("status") == "pausiert" for item in states))
             self.assertEqual(run(self.input_dir, output, [], 30, False), 0)
             self.assertEqual(attack.call_count, 2)
+        self.assertIn('Passwort für locked.docx: "Geheim123!"', printed.getvalue())
         self.assertFalse(is_encrypted(output / "locked.docx"))
 
 
