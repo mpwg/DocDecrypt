@@ -14,3 +14,6 @@ docdecrypt = "docdecrypt.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["docdecrypt*"]
+
+[tool.setuptools.package-data]
+docdecrypt = ["rules/*.rule"]
