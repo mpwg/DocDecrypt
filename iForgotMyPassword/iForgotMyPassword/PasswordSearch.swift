@@ -1,6 +1,7 @@
 import CryptoKit
 import Foundation
 import Security
+import SwiftUI
 
 enum SearchResult {
     case found(String)
@@ -8,8 +9,8 @@ enum SearchResult {
     case exhausted
 }
 
-struct SearchStage: Codable {
-    let name: String
+struct SearchStage {
+    let name: LocalizedStringKey
     let attack: Int
     let inputs: [String]
     let rule: Bool
@@ -19,9 +20,22 @@ struct SearchStage: Codable {
     var hexCharset = false
 
     var key: String {
-        let encoded = (try? JSONEncoder().encode(self)) ?? Data()
+        let identity = SearchStageIdentity(attack: attack, inputs: inputs, rule: rule,
+                                          increment: increment, mode: mode, collision: collision,
+                                          hexCharset: hexCharset)
+        let encoded = (try? JSONEncoder().encode(identity)) ?? Data()
         return SHA256.hash(data: encoded).map { String(format: "%02x", $0) }.joined().prefix(16).description
     }
+}
+
+private struct SearchStageIdentity: Codable {
+    let attack: Int
+    let inputs: [String]
+    let rule: Bool
+    let increment: Bool
+    let mode: Int?
+    let collision: Bool
+    let hexCharset: Bool
 }
 
 struct SearchState: Codable {
@@ -95,10 +109,10 @@ final class KnownPasswords {
             creation[kSecValueData as String] = data
             creation[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
             guard SecItemAdd(creation as CFDictionary, nil) == errSecSuccess else {
-                throw DocumentError.unsupported("Passwort konnte nicht im Schlüsselbund gespeichert werden")
+                throw DocumentError.unsupported("The password could not be saved in the Keychain")
             }
         } else if status != errSecSuccess {
-            throw DocumentError.unsupported("Passwort konnte nicht im Schlüsselbund gespeichert werden")
+            throw DocumentError.unsupported("The password could not be saved in the Keychain")
         }
     }
 
@@ -145,7 +159,7 @@ enum Wordlists {
         }
     }
 
-    static func downloadMissing(status: (String) -> Void) throws -> [URL] {
+    static func downloadMissing(status: (LocalizedStringKey) -> Void) throws -> [URL] {
         let folder = SearchFiles.root.appendingPathComponent("Lists")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true,
                                                  attributes: [.posixPermissions: 0o700])
@@ -157,10 +171,10 @@ enum Wordlists {
                 available.append(target)
                 continue
             }
-            status("Lade \(source.name)")
+            status("Downloading \(source.name)")
             let downloaded = try Data(contentsOf: source.url)
             guard downloaded.count <= 200 * 1024 * 1024, digest(downloaded) == source.sha256 else {
-                throw DocumentError.unsupported("Download von \(source.name) ist beschädigt")
+                throw DocumentError.unsupported("Download of \(source.name) is corrupt")
             }
             if source.compressed {
                 let archive = folder.appendingPathComponent(UUID().uuidString + ".gz")
@@ -171,7 +185,7 @@ enum Wordlists {
                 process.arguments = ["-dc", archive.path]
                 let output = FileManager.default.createFile(atPath: target.path, contents: nil)
                 guard output, let handle = try? FileHandle(forWritingTo: target) else {
-                    throw DocumentError.unsupported("Wortliste kann nicht gespeichert werden")
+                    throw DocumentError.unsupported("The word list could not be saved")
                 }
                 process.standardOutput = handle
                 try process.run()
@@ -182,7 +196,7 @@ enum Wordlists {
                       uncompressed.count <= 500 * 1024 * 1024,
                       digest(uncompressed) == expected else {
                     try? FileManager.default.removeItem(at: target)
-                    throw DocumentError.unsupported("Wortliste \(source.name) ist beschädigt")
+                    throw DocumentError.unsupported("Word list \(source.name) is corrupt")
                 }
             } else {
                 try SearchFiles.save(downloaded, to: target)
@@ -231,7 +245,7 @@ final class PasswordSearch {
             .appendingPathComponent("hashcat_bin"),
               let contents = Bundle.main.resourceURL?.deletingLastPathComponent(),
               FileManager.default.isExecutableFile(atPath: bundle.path) else {
-            throw DocumentError.unsupported("hashcat fehlt im App-Paket")
+            throw DocumentError.unsupported("hashcat is missing from the app bundle")
         }
         // hashcat writes its kernel cache beside its executable. Run a private
         // copy so the signed app bundle remains immutable.
@@ -326,9 +340,9 @@ final class PasswordSearch {
         return nil
     }
 
-    func search(_ url: URL, minutes: Int, download: Bool, status: (String) -> Void) throws -> SearchResult {
+    func search(_ url: URL, minutes: Int, download: Bool, status: (LocalizedStringKey) -> Void) throws -> SearchResult {
         guard (1...1440).contains(minutes) else {
-            throw DocumentError.unsupported("Die Suchdauer muss zwischen 1 und 1440 Minuten liegen")
+            throw DocumentError.unsupported("Search duration must be between 1 and 1440 minutes")
         }
         let hasAccess = url.startAccessingSecurityScopedResource()
         defer { if hasAccess { url.stopAccessingSecurityScopedResource() } }
@@ -343,7 +357,7 @@ final class PasswordSearch {
 
         for password in knownPasswords.all() {
             if isCancelled() { return .paused }
-            status("Prüfe bekannte Passwörter")
+            status("Checking known passwords")
             if try verifies(password, office: office, hashURL: hashURL) {
                 return .found(password)
             }
@@ -370,33 +384,33 @@ final class PasswordSearch {
         try SearchFiles.save(Data((candidates.sorted().joined(separator: "\n") + "\n").utf8), to: context)
         let dictionaries = [context] + lists
         var stages = dictionaries.map {
-            SearchStage(name: "Wörterbuch: \($0.lastPathComponent)", attack: 0,
+            SearchStage(name: "Dictionary: \($0.lastPathComponent)", attack: 0,
                         inputs: [$0.path], rule: false, increment: false)
         }
         let rules = Bundle.main.resourceURL?.appendingPathComponent("best-effort.rule")
         if rules.map({ FileManager.default.fileExists(atPath: $0.path) }) == true {
             stages += dictionaries.prefix(3).map {
-                SearchStage(name: "Regeln: \($0.lastPathComponent)", attack: 0,
+                SearchStage(name: "Rules: \($0.lastPathComponent)", attack: 0,
                             inputs: [$0.path], rule: true, increment: false)
             }
         }
         for dictionary in dictionaries.prefix(2) {
-            stages.append(.init(name: "Zahlenanhang: \(dictionary.lastPathComponent)", attack: 6,
+            stages.append(.init(name: "Number suffix: \(dictionary.lastPathComponent)", attack: 6,
                                 inputs: [dictionary.path, "?d?d"], rule: false, increment: false))
-            stages.append(.init(name: "Jahresanhang: \(dictionary.lastPathComponent)", attack: 6,
+            stages.append(.init(name: "Year suffix: \(dictionary.lastPathComponent)", attack: 6,
                                 inputs: [dictionary.path, "19?d?d"], rule: false, increment: false))
         }
         stages += [
-            .init(name: "Ziffern 1–8", attack: 3, inputs: ["?d?d?d?d?d?d?d?d"], rule: false, increment: true),
-            .init(name: "Kleinbuchstaben 1–6", attack: 3, inputs: ["?l?l?l?l?l?l"], rule: false, increment: true),
+            .init(name: "Digits 1–8", attack: 3, inputs: ["?d?d?d?d?d?d?d?d"], rule: false, increment: true),
+            .init(name: "Lowercase letters 1–6", attack: 3, inputs: ["?l?l?l?l?l?l"], rule: false, increment: true),
             .init(name: "ASCII 1–4", attack: 3, inputs: ["?a?a?a?a"], rule: false, increment: true)
         ]
         if office.mode == 9700,
            office.value.hasPrefix("$oldoffice$0*") || office.value.hasPrefix("$oldoffice$1*") {
             stages += [
-                .init(name: "RC4-Schlüssel", attack: 3, inputs: ["?b?b?b?b?b"],
+                .init(name: "RC4 key", attack: 3, inputs: ["?b?b?b?b?b"],
                       rule: false, increment: false, mode: 9710, hexCharset: true),
-                .init(name: "RC4-Kollisionspasswort", attack: 3,
+                .init(name: "RC4 collision password", attack: 3,
                       inputs: ["?a?a?a?a?a?a?a?a"], rule: false, increment: true,
                       mode: 9720, collision: true)
             ]
@@ -442,7 +456,10 @@ final class PasswordSearch {
                 return .paused
             }
             guard result.0 == 0 || result.0 == 1 else {
-                throw DocumentError.unsupported(result.1.split(separator: "\n").last.map(String.init) ?? "hashcat-Fehler")
+                if let message = result.1.split(separator: "\n").last {
+                    throw DocumentError.external(String(message))
+                }
+                throw DocumentError.unsupported("hashcat error")
             }
             state.completed.insert(stage.key)
             try SearchFiles.save(JSONEncoder().encode(state), to: stateURL)

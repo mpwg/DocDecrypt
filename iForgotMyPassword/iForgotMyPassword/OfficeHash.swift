@@ -1,22 +1,26 @@
 import Foundation
 
 enum DocumentError: LocalizedError {
-    case unsupported(String)
+    case unsupported(LocalizedStringResource)
+    case external(String)
     var errorDescription: String? {
-        switch self { case .unsupported(let message): message }
+        switch self {
+        case .unsupported(let message): String(localized: message)
+        case .external(let message): message
+        }
     }
 }
 
 private extension Data {
     func number(_ offset: Int, _ count: Int) throws -> UInt64 {
         guard offset >= 0, count > 0, count <= 8, offset <= self.count - count else {
-            throw DocumentError.unsupported("Beschädigte Word-Datei")
+            throw DocumentError.unsupported("Corrupt Word file")
         }
         return (0..<count).reduce(UInt64(0)) { $0 | (UInt64(self[offset + $1]) << (8 * $1)) }
     }
     func part(_ offset: Int, _ count: Int) throws -> Data {
         guard offset >= 0, count >= 0, offset <= self.count - count else {
-            throw DocumentError.unsupported("Beschädigte Word-Datei")
+            throw DocumentError.unsupported("Corrupt Word file")
         }
         return self.subdata(in: offset..<(offset + count))
     }
@@ -36,13 +40,13 @@ struct CompoundFile {
 
     init(_ bytes: Data) throws {
         guard bytes.count >= 512, Array(bytes.prefix(8)) == [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1] else {
-            throw DocumentError.unsupported("Kein unterstützter Word-Container")
+            throw DocumentError.unsupported("Unsupported Word container")
         }
         self.bytes = bytes
         let shift = Int(try bytes.number(30, 2))
         let miniShift = Int(try bytes.number(32, 2))
         guard shift == 9 || shift == 12, miniShift == 6 else {
-            throw DocumentError.unsupported("Nicht unterstützte OLE-Sektorgröße")
+            throw DocumentError.unsupported("Unsupported OLE sector size")
         }
         let sectorSize = 1 << shift
         let miniSize = 1 << miniShift
@@ -83,14 +87,14 @@ struct CompoundFile {
             var seen = Set<UInt32>()
             while id < 0xfffffffa && (limit == nil || result.count < limit!) {
                 guard Int(id) < table.count, seen.insert(id).inserted else {
-                    throw DocumentError.unsupported("Beschädigte OLE-Sektorkette")
+                    throw DocumentError.unsupported("Corrupt OLE sector chain")
                 }
                 let offset = unit == sectorSize ? (Int(id) + 1) * unit : Int(id) * unit
                 result.append(try source.part(offset, unit))
                 id = table[Int(id)]
             }
             if let limit {
-                guard result.count >= limit else { throw DocumentError.unsupported("Unvollständiger OLE-Stream") }
+                guard result.count >= limit else { throw DocumentError.unsupported("Incomplete OLE stream") }
                 return Data(result.prefix(limit))
             }
             return result
@@ -106,7 +110,7 @@ struct CompoundFile {
             let name = String(data: nameBytes, encoding: .utf16LittleEndian) ?? ""
             let first = UInt32(try dirData.number(offset + 116, 4))
             guard let size = Int(exactly: try dirData.number(offset + 120, 8)) else {
-                throw DocumentError.unsupported("Ungültige Word-Streamgröße")
+                throw DocumentError.unsupported("Invalid Word stream size")
             }
             entries.append((name, first, size))
         }
@@ -136,10 +140,10 @@ struct CompoundFile {
 
     func stream(_ name: String) throws -> Data {
         guard let entry = directory.first(where: { $0.name == name }) else {
-            throw DocumentError.unsupported("Word-Stream „\(name)“ fehlt")
+            throw DocumentError.unsupported("Word stream \(name) is missing")
         }
         guard entry.size > 0, entry.size <= bytes.count else {
-            throw DocumentError.unsupported("Ungültiger Word-Stream")
+            throw DocumentError.unsupported("Invalid Word stream")
         }
         let useMini = entry.size < cutoff
         let table = useMini ? miniFat : fat
@@ -150,13 +154,13 @@ struct CompoundFile {
         var seen = Set<UInt32>()
         while id < 0xfffffffa && result.count < entry.size {
             guard Int(id) < table.count, seen.insert(id).inserted else {
-                throw DocumentError.unsupported("Beschädigte Word-Streamkette")
+                throw DocumentError.unsupported("Corrupt Word stream chain")
             }
             let offset = useMini ? Int(id) * unit : (Int(id) + 1) * unit
             result.append(try source.part(offset, unit))
             id = table[Int(id)]
         }
-        guard result.count >= entry.size else { throw DocumentError.unsupported("Unvollständiger Word-Stream") }
+        guard result.count >= entry.size else { throw DocumentError.unsupported("Incomplete Word stream") }
         return Data(result.prefix(entry.size))
     }
 }
@@ -178,22 +182,22 @@ struct OfficeHash {
     static func extract(_ url: URL) throws -> OfficeHash {
         let data = try Data(contentsOf: url, options: .mappedIfSafe)
         if data.starts(with: [0x50, 0x4b]) {
-            throw DocumentError.unsupported("Die Datei ist nicht passwortverschlüsselt")
+            throw DocumentError.unsupported("The file is not password protected")
         }
         let compound = try CompoundFile(data)
         if url.pathExtension.lowercased() == "docx" {
             return try modern(compound.stream("EncryptionInfo"))
         }
         guard url.pathExtension.lowercased() == "doc" else {
-            throw DocumentError.unsupported("Nur .doc und .docx werden unterstützt")
+            throw DocumentError.unsupported("Only .doc and .docx files are supported")
         }
         let word = try compound.stream("WordDocument")
         let flags = UInt8(try word.number(11, 1))
         guard flags & 1 != 0 else {
-            throw DocumentError.unsupported("Die Datei ist nicht passwortverschlüsselt")
+            throw DocumentError.unsupported("The file is not password protected")
         }
         guard flags & 0x80 == 0 else {
-            throw DocumentError.unsupported("Alte XOR-Verschleierung wird nicht unterstützt")
+            throw DocumentError.unsupported("Legacy XOR obfuscation is not supported")
         }
         let tableName = flags & 2 == 0 ? "0Table" : "1Table"
         return try legacy(compound.stream(tableName))
@@ -204,7 +208,7 @@ struct OfficeHash {
         let minor = try data.number(2, 2)
         if major == 4 && minor == 4 {
             guard try data.number(4, 4) == 0x40 else {
-                throw DocumentError.unsupported("Nicht unterstützte Office-Verschlüsselung")
+                throw DocumentError.unsupported("Unsupported Office encryption")
             }
             let parser = EncryptedKeyParser()
             let xml = XMLParser(data: try data.part(8, data.count - 8))
@@ -217,16 +221,16 @@ struct OfficeHash {
                   let salt = Data(base64Encoded: attrs["saltValue"] ?? ""),
                   let verifier = Data(base64Encoded: attrs["encryptedVerifierHashInput"] ?? ""),
                   let verifierHash = Data(base64Encoded: attrs["encryptedVerifierHashValue"] ?? "") else {
-                throw DocumentError.unsupported("Ungültige Office-Prüfdaten")
+                throw DocumentError.unsupported("Invalid Office verification data")
             }
             let year: Int
             switch attrs["hashAlgorithm"] {
             case "SHA1": year = 2010
             case "SHA512": year = 2013
-            default: throw DocumentError.unsupported("Nicht unterstützter Office-Hash")
+            default: throw DocumentError.unsupported("Unsupported Office hash")
             }
             guard attrs["cipherAlgorithm"] == "AES" else {
-                throw DocumentError.unsupported("Nicht unterstützte Office-Chiffre")
+                throw DocumentError.unsupported("Unsupported Office cipher")
             }
             let value = "$office$*\(year)*\(spins)*\(bits)*\(saltSize)*\(salt.hex)*\(verifier.hex)*\(verifierHash.hex.prefix(64))"
             return OfficeHash(value: value, mode: year == 2010 ? 9500 : 9600)
@@ -253,7 +257,7 @@ struct OfficeHash {
             return OfficeHash(value: "$oldoffice$1*\(salt.hex)*\(verifier.hex)*\(hash.hex)", mode: 9700)
         }
         guard (2...4).contains(major), minor == 2 else {
-            throw DocumentError.unsupported("Nicht unterstützte .doc-Verschlüsselung")
+            throw DocumentError.unsupported("Unsupported .doc encryption")
         }
         let headerLength = Int(try data.number(8, 4))
         let bits = Int(try data.number(28, 4))
@@ -265,7 +269,7 @@ struct OfficeHash {
         let hash = try data.part(verifierOffset + 24 + saltSize, hashSize)
         let kind = bits == 40 ? 3 : 4
         guard bits == 40 || bits == 128 else {
-            throw DocumentError.unsupported("Nicht unterstützte .doc-Schlüssellänge")
+            throw DocumentError.unsupported("Unsupported .doc key length")
         }
         var value = "$oldoffice$\(kind)*\(salt.hex)*\(verifier.hex)*\(hash.hex)"
         if kind == 3 && data.count >= 544 {

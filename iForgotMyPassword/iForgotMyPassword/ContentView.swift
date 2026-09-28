@@ -17,7 +17,7 @@ final class AppModel: ObservableObject {
     @Published var file: URL?
     @Published var minutes = 60
     @Published var phase: Phase = .ready
-    @Published var status = "Wähle eine verschlüsselte Word-Datei."
+    @Published var status: LocalizedStringKey = "Select an encrypted Word file."
     @Published var password: String?
     @Published var showDownloadQuestion = false
     @Published var showKnownQuestion = false
@@ -34,14 +34,14 @@ final class AppModel: ObservableObject {
         guard phase != .running else { return }
         guard ["doc", "docx"].contains(url.pathExtension.lowercased()) else {
             phase = .failed
-            status = "Bitte eine .doc- oder .docx-Datei auswählen."
+            status = "Please select a .doc or .docx file."
             return
         }
         file = url
         downloadChoice = nil
         phase = .ready
         password = nil
-        status = "Bereit für die Passwortsuche."
+        status = "Ready to search for the password."
     }
 
     func chooseFile() {
@@ -66,7 +66,7 @@ final class AppModel: ObservableObject {
         downloadChoice = download
         password = nil
         phase = .running
-        status = "Lese Passwort-Prüfdaten …"
+        status = "Reading password verification data …"
         let engine = PasswordSearch()
         self.engine = engine
         let minutes = minutes
@@ -84,15 +84,15 @@ final class AppModel: ObservableObject {
                     switch result {
                     case .found(let password):
                         self.password = password
-                        self.status = "Passwort gefunden."
+                        self.status = "Password found."
                         self.phase = .found
                         self.showKnownQuestion = true
                     case .paused:
                         self.phase = .paused
-                        self.status = "Suche angehalten. Du kannst sie fortsetzen."
+                        self.status = "Search paused. You can resume it."
                     case .exhausted:
                         self.phase = .exhausted
-                        self.status = "Mit diesen Suchverfahren wurde kein Passwort gefunden."
+                        self.status = "No password was found with these search methods."
                     }
                 }
             } catch {
@@ -100,7 +100,7 @@ final class AppModel: ObservableObject {
                     guard let self = box.value else { return }
                     self.engine = nil
                     self.phase = .failed
-                    self.status = error.localizedDescription
+                    self.status = LocalizedStringKey(stringLiteral: error.localizedDescription)
                 }
             }
         }
@@ -108,7 +108,7 @@ final class AppModel: ObservableObject {
 
     func pause() {
         engine?.cancel()
-        status = "Suche wird angehalten …"
+        status = "Pausing search …"
     }
 
     func addKnownPassword() {
@@ -116,9 +116,9 @@ final class AppModel: ObservableObject {
         do {
             try KnownPasswords().add(password)
             knownCount = KnownPasswords().all().count
-            status = "Passwort gefunden und zu „Known Passwords“ hinzugefügt."
+            status = "Password found and added to Known Passwords."
         } catch {
-            status = error.localizedDescription
+            status = LocalizedStringKey(stringLiteral: error.localizedDescription)
             phase = .failed
         }
     }
@@ -136,7 +136,7 @@ struct ContentView: View {
                     .foregroundStyle(.tint)
                 VStack(alignment: .leading, spacing: 3) {
                     Text("iForgotMyPassword").font(.largeTitle.bold())
-                    Text("Passwort für eine Word-Datei finden")
+                    Text("Find the password for a Word file")
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -146,13 +146,13 @@ struct ContentView: View {
                 Image(systemName: "doc.badge.plus")
                     .font(.system(size: 36, weight: .light))
                     .foregroundStyle(.secondary)
-                Text(model.file?.lastPathComponent ?? "Word-Datei hier ablegen")
+                Text(model.file?.lastPathComponent ?? "Drop a Word file here")
                     .font(.headline)
                     .lineLimit(1)
-                Text(".doc oder .docx · Die Originaldatei bleibt unverändert")
+                Text(".doc or .docx · The original file remains unchanged")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                Button("Datei auswählen …") { model.chooseFile() }
+                Button("Choose File …") { model.chooseFile() }
                     .disabled(model.phase == .running)
                     .accessibilityIdentifier("chooseFile")
             }
@@ -171,10 +171,10 @@ struct ContentView: View {
             }
 
             HStack {
-                Text("Suchdauer")
+                Text("Search duration")
                 Spacer()
                 Stepper(value: $model.minutes, in: 1...1440, step: 5) {
-                    Text("\(model.minutes) Minuten")
+                    Text("\(model.minutes) minutes")
                         .monospacedDigit()
                         .frame(minWidth: 95, alignment: .trailing)
                 }
@@ -198,11 +198,11 @@ struct ContentView: View {
             if let password = model.password {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Gefundenes Passwort").font(.caption).foregroundStyle(.secondary)
+                        Text("Found password").font(.caption).foregroundStyle(.secondary)
                         Text(password).font(.title3.monospaced()).textSelection(.enabled)
                     }
                     Spacer()
-                    Button("Kopieren") {
+                    Button("Copy") {
                         NSPasteboard.general.clearContents()
                         NSPasteboard.general.setString(password, forType: .string)
                     }
@@ -218,10 +218,10 @@ struct ContentView: View {
                     .foregroundStyle(.secondary)
                 Spacer()
                 if model.phase == .running {
-                    Button("Anhalten") { model.pause() }
+                    Button("Pause") { model.pause() }
                         .accessibilityIdentifier("pauseSearch")
                 } else {
-                    Button(model.phase == .paused ? "Fortsetzen" : "Suche starten") { model.start() }
+                    Button(model.phase == .paused ? "Resume" : "Start Search") { model.start() }
                         .buttonStyle(.borderedProminent)
                         .disabled(model.file == nil)
                         .accessibilityIdentifier("startSearch")
@@ -230,19 +230,19 @@ struct ContentView: View {
         }
         .padding(28)
         .frame(minWidth: 590, minHeight: 500)
-        .alert("Wortlisten herunterladen?", isPresented: $model.showDownloadQuestion) {
-            Button("Ohne Download suchen", role: .cancel) { model.search(download: false) }
+        .alert("Download word lists?", isPresented: $model.showDownloadQuestion) {
+            Button("Search without downloading", role: .cancel) { model.search(download: false) }
                 .keyboardShortcut(.defaultAction)
-            Button("Listen herunterladen") { model.search(download: true) }
+            Button("Download lists") { model.search(download: true) }
         } message: {
-            Text("Die App lädt Passwortlisten von SecLists und Kali Wordlists. Der Download kann über 50 MB groß sein; die entpackten Listen benötigen deutlich mehr Speicherplatz.")
+            Text("The app downloads password lists from SecLists and Kali Wordlists. The download can exceed 50 MB; the extracted lists require considerably more storage.")
         }
-        .alert("Zu „Known Passwords“ hinzufügen?", isPresented: $model.showKnownQuestion) {
-            Button("Nein", role: .cancel) {}
+        .alert("Add to Known Passwords?", isPresented: $model.showKnownQuestion) {
+            Button("No", role: .cancel) {}
                 .keyboardShortcut(.defaultAction)
-            Button("Ja, speichern") { model.addKnownPassword() }
+            Button("Yes, Save") { model.addKnownPassword() }
         } message: {
-            Text("Das gefundene Passwort wird nur mit deiner Zustimmung dauerhaft im macOS-Schlüsselbund gespeichert und bei späteren Suchen zuerst geprüft.")
+            Text("The found password is saved permanently in the macOS Keychain only with your consent and is checked first in future searches.")
         }
     }
 
