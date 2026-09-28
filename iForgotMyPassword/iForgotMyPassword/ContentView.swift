@@ -232,12 +232,14 @@ struct ContentView: View {
         .frame(minWidth: 590, minHeight: 500)
         .alert("Wortlisten herunterladen?", isPresented: $model.showDownloadQuestion) {
             Button("Ohne Download suchen", role: .cancel) { model.search(download: false) }
+                .keyboardShortcut(.defaultAction)
             Button("Listen herunterladen") { model.search(download: true) }
         } message: {
             Text("Die App lädt Passwortlisten von SecLists und Kali Wordlists. Der Download kann über 50 MB groß sein; die entpackten Listen benötigen deutlich mehr Speicherplatz.")
         }
         .alert("Zu „Known Passwords“ hinzufügen?", isPresented: $model.showKnownQuestion) {
             Button("Nein", role: .cancel) {}
+                .keyboardShortcut(.defaultAction)
             Button("Ja, speichern") { model.addKnownPassword() }
         } message: {
             Text("Das gefundene Passwort wird nur mit deiner Zustimmung dauerhaft im macOS-Schlüsselbund gespeichert und bei späteren Suchen zuerst geprüft.")
