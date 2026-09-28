@@ -53,8 +53,12 @@ enum SearchFiles {
 }
 
 final class KnownPasswords {
-    private let service = "at.mat.iForgotMyPassword.known"
+    private let service: String
     private let account = "passwords"
+
+    init(service: String = "at.mat.iForgotMyPassword.known") {
+        self.service = service
+    }
 
     func all() -> [String] {
         let query: [String: Any] = [
@@ -92,6 +96,15 @@ final class KnownPasswords {
         } else if status != errSecSuccess {
             throw DocumentError.unsupported("Passwort konnte nicht im Schlüsselbund gespeichert werden")
         }
+    }
+
+    func clear() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: account
+        ]
+        SecItemDelete(query as CFDictionary)
     }
 }
 
@@ -267,7 +280,7 @@ final class PasswordSearch {
             if isCancelled() { return .paused }
             status("Prüfe bekannte Passwörter")
             let result = try run(["-m", String(office.mode), "-a", "0", "--potfile-disable",
-                                  "--quiet", hashURL.path, "-"], input: password + "\n")
+                                  "--quiet", hashURL.path], input: password + "\n")
             if result.0 == 0, result.1.contains(password) { return .found(password) }
         }
         let lists: [URL]

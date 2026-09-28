@@ -206,6 +206,7 @@ struct OfficeHash {
             }
             let parser = EncryptedKeyParser()
             let xml = XMLParser(data: try data.part(8, data.count - 8))
+            xml.shouldProcessNamespaces = true
             xml.delegate = parser
             guard xml.parse(), let attrs = parser.attributes,
                   let spins = Int(attrs["spinCount"] ?? ""),

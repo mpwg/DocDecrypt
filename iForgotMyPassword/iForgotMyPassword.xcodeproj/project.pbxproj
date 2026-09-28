@@ -96,6 +96,7 @@
 				40AF2A61306A2900009251E9 /* Sources */,
 				40AF2A62306A2900009251E9 /* Frameworks */,
 				40AF2A63306A2900009251E9 /* Resources */,
+				A193F02241234321A193F022 /* Bundle hashcat */,
 			);
 			buildRules = (
 			);
@@ -210,6 +211,18 @@
 			);
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		A193F02241234321A193F022 /* Bundle hashcat */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			name = "Bundle hashcat";
+			shellPath = /bin/bash;
+			shellScript = (
+				"\"${PROJECT_DIR}/../scripts/bundle-hashcat.sh\"",
+			);
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		40AF2A61306A2900009251E9 /* Sources */ = {
@@ -367,6 +380,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -410,6 +424,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
