@@ -1,5 +1,5 @@
 import AppKit
-import Combine
+import Observation
 import SwiftUI
 import UniformTypeIdentifiers
 
@@ -9,24 +9,25 @@ private final class WeakModelBox: @unchecked Sendable {
 }
 
 @MainActor
-final class AppModel: ObservableObject {
+@Observable
+final class AppModel {
     enum Phase {
         case ready, running, paused, exhausted, found, failed
     }
 
-    @Published var file: URL?
-    @Published var minutes = 60
-    @Published var phase: Phase = .ready
-    @Published var status: LocalizedStringKey = "Select an encrypted Word file."
-    @Published var password: String?
-    @Published var showDownloadQuestion = false
-    @Published var showKnownQuestion = false
-    @Published var knownCount = KnownPasswords().all().count
+    var file: URL?
+    var minutes = 60
+    var phase: Phase = .ready
+    var status = String(localized: "Select an encrypted Word file.")
+    var password: String?
+    var showDownloadQuestion = false
+    var showKnownQuestion = false
+    var knownCount = KnownPasswords().all().count
 
     private var engine: PasswordSearch?
     private var downloadChoice: Bool?
 
-    deinit {
+    isolated deinit {
         engine?.cancel()
     }
 
@@ -34,14 +35,14 @@ final class AppModel: ObservableObject {
         guard phase != .running else { return }
         guard ["doc", "docx"].contains(url.pathExtension.lowercased()) else {
             phase = .failed
-            status = "Please select a .doc or .docx file."
+            status = String(localized: "Please select a .doc or .docx file.")
             return
         }
         file = url
         downloadChoice = nil
         phase = .ready
         password = nil
-        status = "Ready to search for the password."
+        status = String(localized: "Ready to search for the password.")
     }
 
     func chooseFile() {
@@ -66,7 +67,7 @@ final class AppModel: ObservableObject {
         downloadChoice = download
         password = nil
         phase = .running
-        status = "Reading password verification data …"
+        status = String(localized: "Reading password verification data …")
         let engine = PasswordSearch()
         self.engine = engine
         let minutes = minutes
@@ -84,15 +85,15 @@ final class AppModel: ObservableObject {
                     switch result {
                     case .found(let password):
                         self.password = password
-                        self.status = "Password found."
+                        self.status = String(localized: "Password found.")
                         self.phase = .found
                         self.showKnownQuestion = true
                     case .paused:
                         self.phase = .paused
-                        self.status = "Search paused. You can resume it."
+                        self.status = String(localized: "Search paused. You can resume it.")
                     case .exhausted:
                         self.phase = .exhausted
-                        self.status = "No password was found with these search methods."
+                        self.status = String(localized: "No password was found with these search methods.")
                     }
                 }
             } catch {
@@ -100,7 +101,7 @@ final class AppModel: ObservableObject {
                     guard let self = box.value else { return }
                     self.engine = nil
                     self.phase = .failed
-                    self.status = LocalizedStringKey(stringLiteral: error.localizedDescription)
+                    self.status = error.localizedDescription
                 }
             }
         }
@@ -108,7 +109,7 @@ final class AppModel: ObservableObject {
 
     func pause() {
         engine?.cancel()
-        status = "Pausing search …"
+        status = String(localized: "Pausing search …")
     }
 
     func addKnownPassword() {
@@ -116,16 +117,16 @@ final class AppModel: ObservableObject {
         do {
             try KnownPasswords().add(password)
             knownCount = KnownPasswords().all().count
-            status = "Password found and added to Known Passwords."
+            status = String(localized: "Password found and added to Known Passwords.")
         } catch {
-            status = LocalizedStringKey(stringLiteral: error.localizedDescription)
+            status = error.localizedDescription
             phase = .failed
         }
     }
 }
 
 struct ContentView: View {
-    @StateObject private var model = AppModel()
+    @State private var model = AppModel()
     @State private var dropTargeted = false
 
     var body: some View {

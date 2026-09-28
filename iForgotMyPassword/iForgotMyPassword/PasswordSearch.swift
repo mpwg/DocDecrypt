@@ -1,7 +1,6 @@
 import CryptoKit
 import Foundation
 import Security
-import SwiftUI
 
 enum SearchResult {
     case found(String)
@@ -10,7 +9,7 @@ enum SearchResult {
 }
 
 struct SearchStage {
-    let name: LocalizedStringKey
+    let name: LocalizedStringResource
     let attack: Int
     let inputs: [String]
     let rule: Bool
@@ -159,7 +158,7 @@ enum Wordlists {
         }
     }
 
-    static func downloadMissing(status: (LocalizedStringKey) -> Void) throws -> [URL] {
+    static func downloadMissing(status: (String) -> Void) throws -> [URL] {
         let folder = SearchFiles.root.appendingPathComponent("Lists")
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true,
                                                  attributes: [.posixPermissions: 0o700])
@@ -171,7 +170,7 @@ enum Wordlists {
                 available.append(target)
                 continue
             }
-            status("Downloading \(source.name)")
+            status(String(localized: "Downloading \(source.name)"))
             let downloaded = try Data(contentsOf: source.url)
             guard downloaded.count <= 200 * 1024 * 1024, digest(downloaded) == source.sha256 else {
                 throw DocumentError.unsupported("Download of \(source.name) is corrupt")
@@ -211,7 +210,7 @@ enum Wordlists {
     }
 }
 
-final class PasswordSearch {
+final class PasswordSearch: @unchecked Sendable {
     private let lock = NSLock()
     private var process: Process?
     private var cancelled = false
@@ -340,7 +339,7 @@ final class PasswordSearch {
         return nil
     }
 
-    func search(_ url: URL, minutes: Int, download: Bool, status: (LocalizedStringKey) -> Void) throws -> SearchResult {
+    func search(_ url: URL, minutes: Int, download: Bool, status: (String) -> Void) throws -> SearchResult {
         guard (1...1440).contains(minutes) else {
             throw DocumentError.unsupported("Search duration must be between 1 and 1440 minutes")
         }
@@ -357,7 +356,7 @@ final class PasswordSearch {
 
         for password in knownPasswords.all() {
             if isCancelled() { return .paused }
-            status("Checking known passwords")
+            status(String(localized: "Checking known passwords"))
             if try verifies(password, office: office, hashURL: hashURL) {
                 return .found(password)
             }
@@ -417,7 +416,7 @@ final class PasswordSearch {
         }
         for stage in stages where !state.completed.contains(stage.key) {
             if isCancelled() || Date() >= deadline { return .paused }
-            status(stage.name)
+            status(String(localized: stage.name))
             let restore = root.appendingPathComponent("\(id)-\(stage.key).restore")
             let session = "ifmp-\(id.prefix(10))-\(stage.key)"
             var attackHash = hashURL

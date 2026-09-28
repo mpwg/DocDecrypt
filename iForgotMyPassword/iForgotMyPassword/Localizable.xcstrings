@@ -1,71 +1,663 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    ".doc or .docx · The original file remains unchanged" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : ".doc oder .docx · Die Originaldatei bleibt unverändert" } } } },
-    "Add to Known Passwords?" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Zu \u201eBekannte Passwörter\u201c hinzufügen?" } } } },
-    "Checking known passwords" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Bekannte Passwörter werden geprüft" } } } },
-    "Choose File …" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Datei auswählen …" } } } },
-    "Copy" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Kopieren" } } } },
-    "Corrupt OLE sector chain" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Beschädigte OLE-Sektorkette" } } } },
-    "Corrupt Word file" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Beschädigte Word-Datei" } } } },
-    "Corrupt Word stream chain" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Beschädigte Word-Streamkette" } } } },
-    "Dictionary: %@" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Wörterbuch: %@" } } } },
-    "Digits 1–8" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Ziffern 1–8" } } } },
-    "Download lists" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Listen herunterladen" } } } },
-    "Download of %@ is corrupt" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Download von %@ ist beschädigt" } } } },
-    "Download word lists?" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Wortlisten herunterladen?" } } } },
-    "Downloading %@" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "%@ wird geladen" } } } },
-    "Drop a Word file here" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Word-Datei hier ablegen" } } } },
-    "Find the password for a Word file" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Passwort für eine Word-Datei finden" } } } },
-    "Found password" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Gefundenes Passwort" } } } },
-    "hashcat error" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "hashcat-Fehler" } } } },
-    "hashcat is missing from the app bundle" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "hashcat fehlt im App-Paket" } } } },
-    "Incomplete OLE stream" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Unvollständiger OLE-Stream" } } } },
-    "Incomplete Word stream" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Unvollständiger Word-Stream" } } } },
-    "Invalid Office verification data" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Ungültige Office-Prüfdaten" } } } },
-    "Invalid Word stream" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Ungültiger Word-Stream" } } } },
-    "Invalid Word stream size" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Ungültige Word-Streamgröße" } } } },
-    "Known Passwords: %lld" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Bekannte Passwörter: %lld" } } } },
-    "Legacy XOR obfuscation is not supported" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Alte XOR-Verschleierung wird nicht unterstützt" } } } },
-    "Lowercase letters 1–6" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Kleinbuchstaben 1–6" } } } },
-    "No" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Nein" } } } },
-    "No password was found with these search methods." : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Mit diesen Suchverfahren wurde kein Passwort gefunden." } } } },
-    "Number suffix: %@" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Zahlenanhang: %@" } } } },
-    "Only .doc and .docx files are supported" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Nur .doc und .docx werden unterstützt" } } } },
-    "Password found." : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Passwort gefunden." } } } },
-    "Password found and added to Known Passwords." : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Passwort gefunden und zu Bekannte Passwörter hinzugefügt." } } } },
-    "Pause" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Anhalten" } } } },
-    "Pausing search …" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Suche wird angehalten …" } } } },
-    "Please select a .doc or .docx file." : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Bitte eine .doc- oder .docx-Datei auswählen." } } } },
-    "RC4 collision password" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "RC4-Kollisionspasswort" } } } },
-    "RC4 key" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "RC4-Schlüssel" } } } },
-    "Reading password verification data …" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Passwort-Prüfdaten werden gelesen …" } } } },
-    "Ready to search for the password." : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Bereit für die Passwortsuche." } } } },
-    "Resume" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Fortsetzen" } } } },
-    "Rules: %@" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Regeln: %@" } } } },
-    "Search duration" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Suchdauer" } } } },
-    "Search duration must be between 1 and 1440 minutes" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Die Suchdauer muss zwischen 1 und 1440 Minuten liegen" } } } },
-    "Search paused. You can resume it." : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Suche angehalten. Du kannst sie fortsetzen." } } } },
-    "Search without downloading" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Ohne Download suchen" } } } },
-    "Select an encrypted Word file." : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Wähle eine verschlüsselte Word-Datei." } } } },
-    "Start Search" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Suche starten" } } } },
-    "The app downloads password lists from SecLists and Kali Wordlists. The download can exceed 50 MB; the extracted lists require considerably more storage." : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Die App lädt Passwortlisten von SecLists und Kali Wordlists. Der Download kann über 50 MB groß sein; die entpackten Listen benötigen deutlich mehr Speicherplatz." } } } },
-    "The file is not password protected" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Die Datei ist nicht passwortverschlüsselt" } } } },
-    "The found password is saved permanently in the macOS Keychain only with your consent and is checked first in future searches." : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Das gefundene Passwort wird nur mit deiner Zustimmung dauerhaft im macOS-Schlüsselbund gespeichert und bei späteren Suchen zuerst geprüft." } } } },
-    "The password could not be saved in the Keychain" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Passwort konnte nicht im Schlüsselbund gespeichert werden" } } } },
-    "The word list could not be saved" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Wortliste kann nicht gespeichert werden" } } } },
-    "Unsupported .doc encryption" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht unterstützte .doc-Verschlüsselung" } } } },
-    "Unsupported .doc key length" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht unterstützte .doc-Schlüssellänge" } } } },
-    "Unsupported OLE sector size" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht unterstützte OLE-Sektorgröße" } } } },
-    "Unsupported Office cipher" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht unterstützte Office-Chiffre" } } } },
-    "Unsupported Office encryption" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht unterstützte Office-Verschlüsselung" } } } },
-    "Unsupported Office hash" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Nicht unterstützter Office-Hash" } } } },
-    "Unsupported Word container" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Kein unterstützter Word-Container" } } } },
-    "Word list %@ is corrupt" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Wortliste %@ ist beschädigt" } } } },
-    "Word stream %@ is missing" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Word-Stream %@ fehlt" } } } },
-    "Year suffix: %@" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Jahresanhang: %@" } } } },
-    "Yes, Save" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "Ja, speichern" } } } },
-    "%lld minutes" : { "localizations" : { "de" : { "stringUnit" : { "state" : "translated", "value" : "%lld Minuten" } } } }
+    ".doc or .docx · The original file remains unchanged" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : ".doc oder .docx · Die Originaldatei bleibt unverändert"
+          }
+        }
+      }
+    },
+    "%lld minutes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld Minuten"
+          }
+        }
+      }
+    },
+    "Add to Known Passwords?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zu „Bekannte Passwörter“ hinzufügen?"
+          }
+        }
+      }
+    },
+    "ASCII 1–4" : {
+
+    },
+    "Checking known passwords" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekannte Passwörter werden geprüft"
+          }
+        }
+      }
+    },
+    "Choose File …" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datei auswählen …"
+          }
+        }
+      }
+    },
+    "Copy" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kopieren"
+          }
+        }
+      }
+    },
+    "Corrupt OLE sector chain" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beschädigte OLE-Sektorkette"
+          }
+        }
+      }
+    },
+    "Corrupt Word file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beschädigte Word-Datei"
+          }
+        }
+      }
+    },
+    "Corrupt Word stream chain" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beschädigte Word-Streamkette"
+          }
+        }
+      }
+    },
+    "Dictionary: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wörterbuch: %@"
+          }
+        }
+      }
+    },
+    "Digits 1–8" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ziffern 1–8"
+          }
+        }
+      }
+    },
+    "Download lists" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listen herunterladen"
+          }
+        }
+      }
+    },
+    "Download of %@ is corrupt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Download von %@ ist beschädigt"
+          }
+        }
+      }
+    },
+    "Download word lists?" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wortlisten herunterladen?"
+          }
+        }
+      }
+    },
+    "Downloading %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ wird geladen"
+          }
+        }
+      }
+    },
+    "Drop a Word file here" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Word-Datei hier ablegen"
+          }
+        }
+      }
+    },
+    "Find the password for a Word file" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passwort für eine Word-Datei finden"
+          }
+        }
+      }
+    },
+    "Found password" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gefundenes Passwort"
+          }
+        }
+      }
+    },
+    "hashcat error" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hashcat-Fehler"
+          }
+        }
+      }
+    },
+    "hashcat is missing from the app bundle" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hashcat fehlt im App-Paket"
+          }
+        }
+      }
+    },
+    "iForgotMyPassword" : {
+
+    },
+    "Incomplete OLE stream" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unvollständiger OLE-Stream"
+          }
+        }
+      }
+    },
+    "Incomplete Word stream" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unvollständiger Word-Stream"
+          }
+        }
+      }
+    },
+    "Invalid Office verification data" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ungültige Office-Prüfdaten"
+          }
+        }
+      }
+    },
+    "Invalid Word stream" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ungültiger Word-Stream"
+          }
+        }
+      }
+    },
+    "Invalid Word stream size" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ungültige Word-Streamgröße"
+          }
+        }
+      }
+    },
+    "Known Passwords: %lld" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bekannte Passwörter: %lld"
+          }
+        }
+      }
+    },
+    "Legacy XOR obfuscation is not supported" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alte XOR-Verschleierung wird nicht unterstützt"
+          }
+        }
+      }
+    },
+    "Lowercase letters 1–6" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kleinbuchstaben 1–6"
+          }
+        }
+      }
+    },
+    "No" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nein"
+          }
+        }
+      }
+    },
+    "No password was found with these search methods." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mit diesen Suchverfahren wurde kein Passwort gefunden."
+          }
+        }
+      }
+    },
+    "Number suffix: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zahlenanhang: %@"
+          }
+        }
+      }
+    },
+    "Only .doc and .docx files are supported" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nur .doc und .docx werden unterstützt"
+          }
+        }
+      }
+    },
+    "Password found and added to Known Passwords." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passwort gefunden und zu Bekannte Passwörter hinzugefügt."
+          }
+        }
+      }
+    },
+    "Password found." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passwort gefunden."
+          }
+        }
+      }
+    },
+    "Pause" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anhalten"
+          }
+        }
+      }
+    },
+    "Pausing search …" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suche wird angehalten …"
+          }
+        }
+      }
+    },
+    "Please select a .doc or .docx file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bitte eine .doc- oder .docx-Datei auswählen."
+          }
+        }
+      }
+    },
+    "RC4 collision password" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RC4-Kollisionspasswort"
+          }
+        }
+      }
+    },
+    "RC4 key" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RC4-Schlüssel"
+          }
+        }
+      }
+    },
+    "Reading password verification data …" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passwort-Prüfdaten werden gelesen …"
+          }
+        }
+      }
+    },
+    "Ready to search for the password." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bereit für die Passwortsuche."
+          }
+        }
+      }
+    },
+    "Resume" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fortsetzen"
+          }
+        }
+      }
+    },
+    "Rules: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regeln: %@"
+          }
+        }
+      }
+    },
+    "Search duration" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suchdauer"
+          }
+        }
+      }
+    },
+    "Search duration must be between 1 and 1440 minutes" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Suchdauer muss zwischen 1 und 1440 Minuten liegen"
+          }
+        }
+      }
+    },
+    "Search paused. You can resume it." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suche angehalten. Du kannst sie fortsetzen."
+          }
+        }
+      }
+    },
+    "Search without downloading" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ohne Download suchen"
+          }
+        }
+      }
+    },
+    "Select an encrypted Word file." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wähle eine verschlüsselte Word-Datei."
+          }
+        }
+      }
+    },
+    "Start Search" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suche starten"
+          }
+        }
+      }
+    },
+    "The app downloads password lists from SecLists and Kali Wordlists. The download can exceed 50 MB; the extracted lists require considerably more storage." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die App lädt Passwortlisten von SecLists und Kali Wordlists. Der Download kann über 50 MB groß sein; die entpackten Listen benötigen deutlich mehr Speicherplatz."
+          }
+        }
+      }
+    },
+    "The file is not password protected" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Datei ist nicht passwortverschlüsselt"
+          }
+        }
+      }
+    },
+    "The found password is saved permanently in the macOS Keychain only with your consent and is checked first in future searches." : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das gefundene Passwort wird nur mit deiner Zustimmung dauerhaft im macOS-Schlüsselbund gespeichert und bei späteren Suchen zuerst geprüft."
+          }
+        }
+      }
+    },
+    "The password could not be saved in the Keychain" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passwort konnte nicht im Schlüsselbund gespeichert werden"
+          }
+        }
+      }
+    },
+    "The word list could not be saved" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wortliste kann nicht gespeichert werden"
+          }
+        }
+      }
+    },
+    "Unsupported .doc encryption" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht unterstützte .doc-Verschlüsselung"
+          }
+        }
+      }
+    },
+    "Unsupported .doc key length" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht unterstützte .doc-Schlüssellänge"
+          }
+        }
+      }
+    },
+    "Unsupported Office cipher" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht unterstützte Office-Chiffre"
+          }
+        }
+      }
+    },
+    "Unsupported Office encryption" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht unterstützte Office-Verschlüsselung"
+          }
+        }
+      }
+    },
+    "Unsupported Office hash" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht unterstützter Office-Hash"
+          }
+        }
+      }
+    },
+    "Unsupported OLE sector size" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nicht unterstützte OLE-Sektorgröße"
+          }
+        }
+      }
+    },
+    "Unsupported Word container" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kein unterstützter Word-Container"
+          }
+        }
+      }
+    },
+    "Word list %@ is corrupt" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wortliste %@ ist beschädigt"
+          }
+        }
+      }
+    },
+    "Word stream %@ is missing" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Word-Stream %@ fehlt"
+          }
+        }
+      }
+    },
+    "Year suffix: %@" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jahresanhang: %@"
+          }
+        }
+      }
+    },
+    "Yes, Save" : {
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ja, speichern"
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }
