@@ -1,65 +1,57 @@
-# DocDecrypt
+# iForgotMyPassword
 
-DocDecrypt versucht, passwortgeschützte Word-Dateien (`.doc` und `.docx`) aus
-einem Ordner lokal zu entschlüsseln. Originale bleiben erhalten. Die Suche
-speichert ihren Fortschritt und läuft pro Datei standardmäßig höchstens eine
-Stunde je Aufruf. Ein starkes oder unbekanntes Passwort lässt sich möglicherweise
-nicht finden.
-
-## Installation
-
-Python 3.10 oder neuer und [hashcat](https://hashcat.net/hashcat/) werden benötigt.
-
-```sh
-python3 -m venv .venv
-.venv/bin/python -m pip install -e .
-```
+iForgotMyPassword ist eine native macOS-App für Apple Silicon. Sie sucht das
+Passwort einer verschlüsselten Word-Datei (`.doc` oder `.docx`) und zeigt es an.
+Die App entschlüsselt das Dokument nicht und legt keine entschlüsselte Kopie an.
+Eine Suche kann dauern oder ohne Treffer enden.
 
 ## Verwendung
 
-```sh
-.venv/bin/docdecrypt samples
-.venv/bin/docdecrypt /pfad/zu/word-dateien --ausgabe /pfad/zu/ergebnissen
-.venv/bin/docdecrypt samples --wortliste /pfad/eigene-liste.txt --stunden-pro-datei 2
-.venv/bin/docdecrypt samples --ohne-download
-```
+1. Die App öffnen und eine Datei auswählen oder auf das Fenster ziehen.
+2. Die maximale Suchdauer einstellen (1 bis 1440 Minuten, Standard: 60).
+3. Die Suche starten. Vor einem Download größerer Wortlisten fragt die App nach.
+   Auch ohne Download kann sie mit vorhandenen Listen und Dateinamen-Kandidaten suchen.
+4. Ein gefundenes Passwort kopieren. Danach fragt die App, ob es zu
+   **Known Passwords** hinzugefügt werden soll. Standard ist **Nein**.
 
-Der Ausgabeordner ist standardmäßig `./recovered`. Beim ersten Aufruf lädt das
-Programm dort unter `.docdecrypt/lists` zwei Listen aus SecLists und `rockyou`
-aus dem Kali-Wordlists-Projekt. Die Downloads sind auf feste Quellversionen und
-SHA-256-Prüfsummen festgelegt. Mit `--ohne-download` verwendet es nur vorhandene
-Listen sowie Kandidaten aus den Dateinamen. Zusätzliche Listen können mehrfach
-mit `--wortliste` angegeben werden. Eine Liste enthält ein Passwort je Zeile.
+Nur nach Zustimmung speichert die App ein Passwort im macOS-Schlüsselbund.
+Gespeicherte Passwörter werden bei späteren Dateien zuerst geprüft. Suchstände,
+Prüfdaten, Wortlisten und der private hashcat-Cache liegen unter
+`~/Library/Application Support/iForgotMyPassword/`. Die Originaldatei bleibt
+unverändert. Der Suchstand ermöglicht eine Fortsetzung nach dem Anhalten oder
+nach Ablauf der eingestellten Zeit. Bei einem Fund wird das Passwort selbst
+nicht im Suchstand gespeichert.
 
-Die Suche versucht bekannte Passwörter, eigene und erzeugte Listen, allgemeine
-Listen, Regelvarianten, Zahlen- und Jahresanhänge, Masken und bei geeigneten
-alten Word-Dateien RC4-Kollisionsverfahren. Sie kann mit Strg+C unterbrochen
-werden. Ein erneuter Aufruf mit demselben Ausgabeordner setzt die Suche fort.
-Hashcat benötigt beim ersten Start möglicherweise zusätzliche Zeit für seine
-GPU-Initialisierung.
+## Bauen
 
-Entschlüsselte Dateien liegen direkt im Ausgabeordner. Der Unterordner
-`.docdecrypt` enthält Passwörter, Prüfdaten und Sitzungsstände; er erhält auf
-Unix-Systemen nur Zugriff für den aktuellen Benutzer. Er gehört nicht in ein
-öffentliches Repository. Die mitgelieferte `.gitignore` nimmt den Standardordner,
-Word-Dateien, Listen und Sitzungsdateien von Git aus. Für selbst gewählte
-Ausgabeordner innerhalb anderer Repositories ist deren Git-Konfiguration
-ebenfalls zu prüfen.
+Benötigt werden Xcode 27 und auf dem **Build-Mac** Homebrew-Pakete für hashcat
+7.1.2, minizip und xxhash. Die fertige App enthält diese Laufzeitbestandteile;
+auf dem Ziel-Mac sind weder Homebrew noch Python nötig. Das Xcode-Projekt ist
+[iForgotMyPassword.xcodeproj](iForgotMyPassword/iForgotMyPassword.xcodeproj).
+Zielplattform ist macOS 14 oder neuer auf Apple Silicon. Xcode baut und signiert
+die App für die lokale Ausführung. Eine Verteilung außerhalb des eigenen Macs
+erfordert einen separaten Signierungs- und Notarisierungsschritt.
 
-Ein gefundenes Passwort wird für jede betroffene Datei im Terminal ausgegeben,
-auch wenn eine bereits entschlüsselte Datei später erneut verarbeitet wird.
-Die Anführungszeichen gehören zur Darstellung; Steuerzeichen werden maskiert.
-Terminalausgaben können Passwörter enthalten und sollten nicht öffentlich geteilt
-werden.
-
-Rückgabewert `0` bedeutet, dass alle Dateien unverschlüsselt im Ausgabeordner
-liegen. `1` bedeutet, dass mindestens eine Datei noch nicht entschlüsselt wurde.
-`2` bezeichnet einen Eingabe- oder Werkzeugfehler.
+Der Build-Schritt [bundle-hashcat.sh](scripts/bundle-hashcat.sh) übernimmt die
+benötigten hashcat-Module, Kernel, Bibliotheken und Lizenzhinweise in das
+App-Paket. Er erwartet hashcat 7.1.2 unter
+`/opt/homebrew/Cellar/hashcat/7.1.2`. Vor einem Build muss dieses Paket auf dem
+Build-Mac vorhanden sein.
 
 ## Tests
 
-```sh
-.venv/bin/python -m unittest discover -s tests -v
-```
+Die Xcode-Scheme `iForgotMyPassword` enthält Unit- und UI-Tests. Die Tests
+prüfen die Word-Prüfdaten, einen vollständigen Passwortfund ohne entschlüsselte
+Ausgabedatei, die Verwendung eines bewusst gespeicherten Passworts und die
+anfänglichen Bedienelemente. Die `.docx`-Beispiele wurden für dieses Projekt
+erzeugt. Die `.doc`-Testdatei stammt aus den
+[Testdaten von msoffcrypto-tool](https://github.com/nolze/msoffcrypto-tool/tree/master/tests/inputs);
+deren MIT-Lizenz und Hinweise liegen bei der Testdatei.
 
-Die Tests erzeugen eigene Word-Dateien und verwenden keine privaten Beispiele.
+## Grenzen
+
+Unterstützt werden die Office-Verschlüsselungsverfahren, für die die App
+hashcat-Modi 9400, 9500, 9600, 9700 und 9800 enthält. Unverschlüsselte Dateien,
+XOR-Verschleierung und andere Office-Formate meldet sie als nicht unterstützt.
+Die Passwortsuche erfolgt lokal; nur der ausdrücklich bestätigte
+Wortlisten-Download verbindet sich mit SecLists und Kali Wordlists.

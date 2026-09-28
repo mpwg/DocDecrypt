@@ -25,6 +25,12 @@ final class iForgotMyPasswordTests: XCTestCase {
         XCTAssertThrowsError(try OfficeHash.extract(fixture("plain.docx")))
     }
 
+    func testEncryptedDOCExtractsRC4Hash() throws {
+        let hash = try OfficeHash.extract(fixture("rc4cryptoapi_password.doc"))
+        XCTAssertEqual(hash.mode, 9800)
+        XCTAssertTrue(hash.value.hasPrefix("$oldoffice$4*389eb85ba016979b45872262bd473d33*"))
+    }
+
     func testKnownPasswordOptInAndSearch() throws {
         let store = KnownPasswords(service: "at.mat.iForgotMyPassword.test.\(UUID().uuidString)")
         defer { store.clear() }
@@ -37,6 +43,18 @@ final class iForgotMyPasswordTests: XCTestCase {
             return XCTFail("Das bekannte Passwort wurde nicht gefunden")
         }
         XCTAssertEqual(password, "Geheim123!")
+    }
+
+    func testKnownPasswordFindsEncryptedDOC() throws {
+        let store = KnownPasswords(service: "at.mat.iForgotMyPassword.test.\(UUID().uuidString)")
+        defer { store.clear() }
+        try store.add("Password1234_")
+        let result = try PasswordSearch(knownPasswords: store)
+            .search(fixture("rc4cryptoapi_password.doc"), minutes: 1, download: false) { _ in }
+        guard case .found(let password) = result else {
+            return XCTFail("Das .doc-Passwort wurde nicht gefunden")
+        }
+        XCTAssertEqual(password, "Password1234_")
     }
 
     func testSearchFindsPasswordWithoutCreatingDecryptedDocument() throws {

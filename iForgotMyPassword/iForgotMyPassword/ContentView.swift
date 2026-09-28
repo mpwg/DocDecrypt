@@ -3,6 +3,11 @@ import Combine
 import SwiftUI
 import UniformTypeIdentifiers
 
+private final class WeakModelBox: @unchecked Sendable {
+    weak var value: AppModel?
+    init(_ value: AppModel) { self.value = value }
+}
+
 @MainActor
 final class AppModel: ObservableObject {
     enum Phase {
@@ -19,6 +24,11 @@ final class AppModel: ObservableObject {
     @Published var knownCount = KnownPasswords().all().count
 
     private var engine: PasswordSearch?
+    private var downloadChoice: Bool?
+
+    deinit {
+        engine?.cancel()
+    }
 
     func select(_ url: URL) {
         guard phase != .running else { return }
@@ -28,6 +38,7 @@ final class AppModel: ObservableObject {
             return
         }
         file = url
+        downloadChoice = nil
         phase = .ready
         password = nil
         status = "Bereit für die Passwortsuche."
@@ -43,27 +54,32 @@ final class AppModel: ObservableObject {
 
     func start() {
         guard file != nil, phase != .running else { return }
-        if Wordlists.cached().count < Wordlists.sources.count {
+        if downloadChoice == nil && Wordlists.cached().count < Wordlists.sources.count {
             showDownloadQuestion = true
         } else {
-            search(download: false)
+            search(download: downloadChoice ?? false)
         }
     }
 
     func search(download: Bool) {
         guard let file, phase != .running else { return }
+        downloadChoice = download
         password = nil
         phase = .running
         status = "Lese Passwort-Prüfdaten …"
         let engine = PasswordSearch()
         self.engine = engine
         let minutes = minutes
-        Task.detached { [self] in
+        let box = WeakModelBox(self)
+        Task.detached {
             do {
                 let result = try engine.search(file, minutes: minutes, download: download) { message in
-                    Task { @MainActor in self.status = message }
+                    Task { @MainActor in
+                        if box.value?.phase == .running { box.value?.status = message }
+                    }
                 }
                 await MainActor.run {
+                    guard let self = box.value else { return }
                     self.engine = nil
                     switch result {
                     case .found(let password):
@@ -81,6 +97,7 @@ final class AppModel: ObservableObject {
                 }
             } catch {
                 await MainActor.run {
+                    guard let self = box.value else { return }
                     self.engine = nil
                     self.phase = .failed
                     self.status = error.localizedDescription
