@@ -1,3 +1,11 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon\r
+._*
+
+# Project-generated documents and recovery output
 samples/*
 *.doc
 *.docx
@@ -6,11 +14,44 @@ samples/*
 *.dotx
 *.dotm
 recovered/
+
+# Xcode build products and user state
 build/
 dist/
 DerivedData/
 *.xcuserstate
+*.xccheckout
+*.xcscmblueprint
+*.moved-aside
+*.xcuserdatad/
 xcuserdata/
+
+# Xcode project workspace data generated locally
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+
+# Swift Package Manager
+.build/
+Packages/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# SwiftPM/Xcode indexing and coverage output
+.swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
+.swiftpm/xcode/package.xcworkspace/xcuserdata/
+.swiftpm/configuration/registries.json
+.swiftpm/xcode/xcuserdata/
+*.profdata
+*.profraw
+
+# App and test output
+*.app
+*.dSYM
+*.dSYM.zip
+*.ipa
+*.xcarchive
+*.xcresult
+
+# Password-search runtime files
 *.hash
 *.potfile
 *.restore
