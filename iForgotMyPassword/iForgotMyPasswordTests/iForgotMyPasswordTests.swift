@@ -94,4 +94,25 @@ final class iForgotMyPasswordTests: XCTestCase {
         XCTAssertFalse(files.contains { $0.hasPrefix(id) && $0.hasSuffix(".result") },
                        "Passwörter dürfen nicht in Ergebnisdateien landen")
     }
+
+    func testPauseAndResumeSearch() throws {
+        let temporary = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: temporary, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: temporary) }
+        let input = temporary.appendingPathComponent("Geheim123.docx")
+        try FileManager.default.copyItem(at: fixture("encrypted.docx"), to: input)
+        let store = KnownPasswords(service: "at.mat.iForgotMyPassword.test.\(UUID().uuidString)")
+        defer { store.clear() }
+        let first = PasswordSearch(knownPasswords: store)
+        let paused = try first.search(input, minutes: 1, download: false) { step in
+            if step.hasPrefix("Wörterbuch:") { first.cancel() }
+        }
+        guard case .paused = paused else { return XCTFail("Die Suche wurde nicht angehalten") }
+        let resumed = try PasswordSearch(knownPasswords: store)
+            .search(input, minutes: 1, download: false) { _ in }
+        guard case .found(let password) = resumed else {
+            return XCTFail("Die Suche wurde nicht erfolgreich fortgesetzt")
+        }
+        XCTAssertEqual(password, "Geheim123!")
+    }
 }
