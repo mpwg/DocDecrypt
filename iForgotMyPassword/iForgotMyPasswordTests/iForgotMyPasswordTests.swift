@@ -73,5 +73,9 @@ final class iForgotMyPasswordTests: XCTestCase {
         XCTAssertEqual(password, "Geheim123!")
         XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: temporary.path), ["Geheim123.docx"])
         XCTAssertTrue(store.all().isEmpty, "Ein Fund wird ohne Zustimmung nicht gespeichert")
+        let id = try SearchFiles.fileID(input)
+        let files = try FileManager.default.contentsOfDirectory(atPath: SearchFiles.privateDirectory().path)
+        XCTAssertFalse(files.contains { $0.hasPrefix(id) && $0.hasSuffix(".result") },
+                       "Passwörter dürfen nicht in Ergebnisdateien landen")
     }
 }

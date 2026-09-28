@@ -51,7 +51,8 @@ deren MIT-Lizenz und Hinweise liegen bei der Testdatei.
 ## Grenzen
 
 Unterstützt werden die Office-Verschlüsselungsverfahren, für die die App
-hashcat-Modi 9400, 9500, 9600, 9700 und 9800 enthält. Unverschlüsselte Dateien,
+hashcat-Modi 9400, 9500, 9600, 9700 und 9800 sowie die RC4-Kollisionssuche
+(9710/9720) enthält. Unverschlüsselte Dateien,
 XOR-Verschleierung und andere Office-Formate meldet sie als nicht unterstützt.
 Die Passwortsuche erfolgt lokal; nur der ausdrücklich bestätigte
 Wortlisten-Download verbindet sich mit SecLists und Kali Wordlists.

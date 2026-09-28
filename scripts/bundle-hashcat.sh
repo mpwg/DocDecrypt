@@ -20,7 +20,7 @@ cp "${HASHCAT_ROOT}/bin/hashcat_bin" "${APP_CONTENTS}/MacOS/hashcat_bin"
 rsync -a --exclude modules/ --exclude bridges/ "${HASHCAT_ROOT}/share/hashcat/" "${APP_CONTENTS}/Resources/hashcat/"
 rm -rf "${APP_CONTENTS}/Resources/hashcat/modules" "${APP_CONTENTS}/Resources/hashcat/bridges"
 mkdir -p "${APP_CONTENTS}/Resources/hashcat/modules"
-for mode in 00000 09400 09500 09600 09700 09800; do
+for mode in 00000 09400 09500 09600 09700 09710 09720 09800; do
   module="${APP_CONTENTS}/Resources/hashcat/modules/module_${mode}.so"
   cp "${HASHCAT_ROOT}/share/hashcat/modules/module_${mode}.so" "${module}"
   install_name_tool -change /opt/homebrew/opt/minizip/lib/libminizip.1.dylib \

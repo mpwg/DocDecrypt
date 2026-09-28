@@ -105,7 +105,9 @@ struct CompoundFile {
             let nameBytes = try dirData.part(offset, length - 2)
             let name = String(data: nameBytes, encoding: .utf16LittleEndian) ?? ""
             let first = UInt32(try dirData.number(offset + 116, 4))
-            let size = Int(try dirData.number(offset + 120, 8))
+            guard let size = Int(exactly: try dirData.number(offset + 120, 8)) else {
+                throw DocumentError.unsupported("Ungültige Word-Streamgröße")
+            }
             entries.append((name, first, size))
         }
         let miniFirst = UInt32(try bytes.number(60, 4))

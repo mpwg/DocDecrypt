@@ -14,6 +14,9 @@ struct SearchStage: Codable {
     let inputs: [String]
     let rule: Bool
     let increment: Bool
+    var mode: Int? = nil
+    var collision = false
+    var hexCharset = false
 
     var key: String {
         let encoded = (try? JSONEncoder().encode(self)) ?? Data()
@@ -23,6 +26,7 @@ struct SearchStage: Codable {
 
 struct SearchState: Codable {
     var completed: Set<String> = []
+    var collisionKey: String?
 }
 
 enum SearchFiles {
@@ -288,6 +292,40 @@ final class PasswordSearch {
         return (process.terminationStatus, String(decoding: data, as: UTF8.self))
     }
 
+    private func verifies(_ password: String, office: OfficeHash, hashURL: URL) throws -> Bool {
+        let result = try run(["-m", String(office.mode), "-a", "0", "--potfile-disable",
+                              "--quiet", hashURL.path], input: password + "\n")
+        return result.0 == 0 && result.1.split(separator: "\n").contains {
+            ($0.hasPrefix("$office$") || $0.hasPrefix("$oldoffice$")) &&
+            $0.hasSuffix(":" + password)
+        }
+    }
+
+    private func decodedPassword(_ value: String) -> String? {
+        if value.hasPrefix("$HEX["), value.hasSuffix("]") {
+            let hex = value.dropFirst(5).dropLast()
+            guard hex.count.isMultiple(of: 2) else { return nil }
+            var bytes = Data()
+            var index = hex.startIndex
+            while index < hex.endIndex {
+                let next = hex.index(index, offsetBy: 2)
+                guard let byte = UInt8(hex[index..<next], radix: 16) else { return nil }
+                bytes.append(byte)
+                index = next
+            }
+            return String(data: bytes, encoding: .utf8)
+        }
+        return value
+    }
+
+    private func crackedPassword(_ output: String, hash: String) -> String? {
+        let prefix = hash + ":"
+        for line in output.split(separator: "\n") where line.hasPrefix(prefix) {
+            return decodedPassword(String(line.dropFirst(prefix.count)))
+        }
+        return nil
+    }
+
     func search(_ url: URL, minutes: Int, download: Bool, status: (String) -> Void) throws -> SearchResult {
         guard (1...1440).contains(minutes) else {
             throw DocumentError.unsupported("Die Suchdauer muss zwischen 1 und 1440 Minuten liegen")
@@ -306,9 +344,9 @@ final class PasswordSearch {
         for password in knownPasswords.all() {
             if isCancelled() { return .paused }
             status("Prüfe bekannte Passwörter")
-            let result = try run(["-m", String(office.mode), "-a", "0", "--potfile-disable",
-                                  "--quiet", hashURL.path], input: password + "\n")
-            if result.0 == 0, result.1.contains(password) { return .found(password) }
+            if try verifies(password, office: office, hashURL: hashURL) {
+                return .found(password)
+            }
         }
         let lists: [URL]
         if download {
@@ -353,30 +391,52 @@ final class PasswordSearch {
             .init(name: "Kleinbuchstaben 1–6", attack: 3, inputs: ["?l?l?l?l?l?l"], rule: false, increment: true),
             .init(name: "ASCII 1–4", attack: 3, inputs: ["?a?a?a?a"], rule: false, increment: true)
         ]
+        if office.mode == 9700,
+           office.value.hasPrefix("$oldoffice$0*") || office.value.hasPrefix("$oldoffice$1*") {
+            stages += [
+                .init(name: "RC4-Schlüssel", attack: 3, inputs: ["?b?b?b?b?b"],
+                      rule: false, increment: false, mode: 9710, hexCharset: true),
+                .init(name: "RC4-Kollisionspasswort", attack: 3,
+                      inputs: ["?a?a?a?a?a?a?a?a"], rule: false, increment: true,
+                      mode: 9720, collision: true)
+            ]
+        }
         for stage in stages where !state.completed.contains(stage.key) {
             if isCancelled() || Date() >= deadline { return .paused }
             status(stage.name)
             let restore = root.appendingPathComponent("\(id)-\(stage.key).restore")
-            let output = root.appendingPathComponent("\(id)-\(stage.key).result")
-            defer { try? FileManager.default.removeItem(at: output) }
             let session = "ifmp-\(id.prefix(10))-\(stage.key)"
+            var attackHash = hashURL
+            if stage.collision {
+                guard let key = state.collisionKey else { continue }
+                attackHash = root.appendingPathComponent("\(id).collision.hash")
+                try SearchFiles.save(Data((office.value + ":" + key + "\n").utf8), to: attackHash)
+            }
             var arguments: [String]
             if FileManager.default.fileExists(atPath: restore.path) {
                 arguments = ["--restore", "--session", session, "--restore-file-path", restore.path]
             } else {
-                arguments = ["-m", String(office.mode), "-a", String(stage.attack),
+                arguments = ["-m", String(stage.mode ?? office.mode), "-a", String(stage.attack),
                              "--session", session, "--restore-file-path", restore.path,
                              "--potfile-disable", "--runtime", String(max(1, Int(deadline.timeIntervalSinceNow))),
-                             "--quiet", "--outfile", output.path, "--outfile-format", "2", hashURL.path]
+                             "--quiet", attackHash.path]
                 if stage.rule, let rules { arguments += ["-r", rules.path] }
                 if stage.increment { arguments += ["--increment", "--increment-min", "1"] }
+                if stage.hexCharset { arguments.append("--hex-charset") }
                 arguments += stage.inputs
             }
             let result = try run(arguments)
-            if let raw = try? Data(contentsOf: output), !raw.isEmpty,
-               let password = String(data: raw, encoding: .utf8)?.trimmingCharacters(in: .newlines),
-               !password.isEmpty {
-                return .found(password)
+            let attackValue = stage.collision ? office.value + ":" + (state.collisionKey ?? "") : office.value
+            if let candidate = crackedPassword(result.1, hash: attackValue) {
+                if stage.mode == 9710 {
+                    state.collisionKey = candidate
+                    state.completed.insert(stage.key)
+                    try SearchFiles.save(JSONEncoder().encode(state), to: stateURL)
+                    continue
+                }
+                if try verifies(candidate, office: office, hashURL: hashURL) {
+                    return .found(candidate)
+                }
             }
             if isCancelled() || Date() >= deadline || FileManager.default.fileExists(atPath: restore.path) {
                 return .paused
