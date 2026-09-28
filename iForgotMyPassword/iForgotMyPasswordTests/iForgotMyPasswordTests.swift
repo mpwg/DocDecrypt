@@ -31,6 +31,22 @@ final class iForgotMyPasswordTests: XCTestCase {
         XCTAssertTrue(hash.value.hasPrefix("$oldoffice$4*389eb85ba016979b45872262bd473d33*"))
     }
 
+    func testOffice2007StandardPassword() throws {
+        let input = fixture("ecma376standard_password.docx")
+        let hash = try OfficeHash.extract(input)
+        XCTAssertEqual(hash.mode, 9400)
+        XCTAssertTrue(hash.value.hasPrefix("$office$*2007*"))
+        let store = KnownPasswords(service: "at.mat.iForgotMyPassword.test.\(UUID().uuidString)")
+        defer { store.clear() }
+        try store.add("Password1234_")
+        let result = try PasswordSearch(knownPasswords: store)
+            .search(input, minutes: 1, download: false) { _ in }
+        guard case .found(let password) = result else {
+            return XCTFail("Office-2007-Passwort wurde nicht gefunden")
+        }
+        XCTAssertEqual(password, "Password1234_")
+    }
+
     func testKnownPasswordOptInAndSearch() throws {
         let store = KnownPasswords(service: "at.mat.iForgotMyPassword.test.\(UUID().uuidString)")
         defer { store.clear() }
