@@ -216,22 +216,46 @@ final class PasswordSearch {
         return cancelled
     }
 
-    private var executable: URL? {
-        if let bundle = Bundle.main.executableURL?.deletingLastPathComponent()
+    private func executable() throws -> URL {
+        guard let bundle = Bundle.main.executableURL?.deletingLastPathComponent()
             .appendingPathComponent("hashcat_bin"),
-           FileManager.default.isExecutableFile(atPath: bundle.path) {
-            return bundle
+              let contents = Bundle.main.resourceURL?.deletingLastPathComponent(),
+              FileManager.default.isExecutableFile(atPath: bundle.path) else {
+            throw DocumentError.unsupported("hashcat fehlt im App-Paket")
         }
-        // Local Xcode tests can use the developer installation.
-        let local = URL(fileURLWithPath: "/opt/homebrew/bin/hashcat")
-        return FileManager.default.isExecutableFile(atPath: local.path) ? local : nil
+        // hashcat writes its kernel cache beside its executable. Run a private
+        // copy so the signed app bundle remains immutable.
+        let runtime = try SearchFiles.privateDirectory().appendingPathComponent("Runtime")
+        let bin = runtime.appendingPathComponent("MacOS")
+        let frameworks = runtime.appendingPathComponent("Frameworks")
+        try FileManager.default.createDirectory(at: bin, withIntermediateDirectories: true,
+                                                 attributes: [.posixPermissions: 0o700])
+        try FileManager.default.createDirectory(at: frameworks, withIntermediateDirectories: true,
+                                                 attributes: [.posixPermissions: 0o700])
+        let target = bin.appendingPathComponent("hashcat_bin")
+        if !FileManager.default.fileExists(atPath: target.path) ||
+            (try? target.resourceValues(forKeys: [.fileSizeKey]).fileSize) !=
+                (try? bundle.resourceValues(forKeys: [.fileSizeKey]).fileSize) {
+            try? FileManager.default.removeItem(at: target)
+            try FileManager.default.copyItem(at: bundle, to: target)
+        }
+        let links: [(URL, URL)] = [
+            (bin.appendingPathComponent("OpenCL"), contents.appendingPathComponent("Resources/hashcat/OpenCL")),
+            (bin.appendingPathComponent("modules"), contents.appendingPathComponent("Resources/hashcat/modules")),
+            (frameworks.appendingPathComponent("libminizip.1.dylib"), contents.appendingPathComponent("Frameworks/libminizip.1.dylib")),
+            (frameworks.appendingPathComponent("libxxhash.0.dylib"), contents.appendingPathComponent("Frameworks/libxxhash.0.dylib"))
+        ]
+        for (link, destination) in links where !FileManager.default.fileExists(atPath: link.path) {
+            try FileManager.default.createSymbolicLink(at: link, withDestinationURL: destination)
+        }
+        return target
     }
 
     private func run(_ arguments: [String], input: String? = nil) throws -> (Int32, String) {
-        guard let executable else { throw DocumentError.unsupported("hashcat fehlt im App-Paket") }
+        let executable = try executable()
         let process = Process()
         process.executableURL = executable
-        process.arguments = arguments
+        process.arguments = ["--logfile-disable"] + arguments
         var environment = ProcessInfo.processInfo.environment
         if let resources = Bundle.main.resourceURL {
             environment["XDG_DATA_HOME"] = resources.path

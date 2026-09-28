@@ -38,4 +38,22 @@ final class iForgotMyPasswordTests: XCTestCase {
         }
         XCTAssertEqual(password, "Geheim123!")
     }
+
+    func testSearchFindsPasswordWithoutCreatingDecryptedDocument() throws {
+        let temporary = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        try FileManager.default.createDirectory(at: temporary, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: temporary) }
+        let input = temporary.appendingPathComponent("Geheim123.docx")
+        try FileManager.default.copyItem(at: fixture("encrypted.docx"), to: input)
+        let store = KnownPasswords(service: "at.mat.iForgotMyPassword.test.\(UUID().uuidString)")
+        defer { store.clear() }
+        let result = try PasswordSearch(knownPasswords: store)
+            .search(input, minutes: 1, download: false) { _ in }
+        guard case .found(let password) = result else {
+            return XCTFail("Das Passwort wurde nicht gefunden")
+        }
+        XCTAssertEqual(password, "Geheim123!")
+        XCTAssertEqual(try FileManager.default.contentsOfDirectory(atPath: temporary.path), ["Geheim123.docx"])
+        XCTAssertTrue(store.all().isEmpty, "Ein Fund wird ohne Zustimmung nicht gespeichert")
+    }
 }

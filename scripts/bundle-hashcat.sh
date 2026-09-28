@@ -18,8 +18,6 @@ for bundled in "${APP_CONTENTS}/MacOS/hashcat_bin" \
 done
 cp "${HASHCAT_ROOT}/bin/hashcat_bin" "${APP_CONTENTS}/MacOS/hashcat_bin"
 rsync -a "${HASHCAT_ROOT}/share/hashcat/" "${APP_CONTENTS}/Resources/hashcat/"
-ln -sfn ../Resources/hashcat/OpenCL "${APP_CONTENTS}/MacOS/OpenCL"
-ln -sfn ../Resources/hashcat/modules "${APP_CONTENTS}/MacOS/modules"
 cp "${HASHCAT_ROOT}/share/doc/hashcat/docs/license.txt" "${APP_CONTENTS}/Resources/hashcat-license.txt"
 cp "${PROJECT_DIR}/../docdecrypt/rules/best-effort.rule" "${APP_CONTENTS}/Resources/best-effort.rule"
 
@@ -32,3 +30,7 @@ install_name_tool -change /opt/homebrew/opt/xxhash/lib/libxxhash.0.dylib \
 codesign --force --sign - "${APP_CONTENTS}/Frameworks/libminizip.1.dylib"
 codesign --force --sign - "${APP_CONTENTS}/Frameworks/libxxhash.0.dylib"
 codesign --force --sign - "${APP_CONTENTS}/MacOS/hashcat_bin"
+# Older test runs may have left hashcat's cache beside the executable.
+rm -f "${APP_CONTENTS}/MacOS/hashcat.dictstat2" "${APP_CONTENTS}/MacOS/hashcat.log"
+rm -rf "${APP_CONTENTS}/MacOS/kernels"
+rm -f "${APP_CONTENTS}/MacOS/OpenCL" "${APP_CONTENTS}/MacOS/modules"
