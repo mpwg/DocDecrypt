@@ -26,7 +26,7 @@ nicht im Suchstand gespeichert.
 
 Benötigt werden Xcode 27 und auf dem **Build-Mac** Homebrew-Pakete für hashcat
 7.1.2, minizip und xxhash. Die fertige App enthält diese Laufzeitbestandteile;
-auf dem Ziel-Mac sind weder Homebrew noch Python nötig. Das Xcode-Projekt ist
+auf dem Ziel-Mac ist keine zusätzliche Installation nötig. Das Xcode-Projekt ist
 [iForgotMyPassword.xcodeproj](iForgotMyPassword/iForgotMyPassword.xcodeproj).
 Zielplattform ist macOS 14 oder neuer auf Apple Silicon. Xcode baut und signiert
 die App für die lokale Ausführung. Eine Verteilung außerhalb des eigenen Macs

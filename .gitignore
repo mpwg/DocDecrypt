@@ -5,13 +5,7 @@ samples/*
 *.dot
 *.dotx
 *.dotm
-.docdecrypt/
 recovered/
-__pycache__/
-*.py[cod]
-.pytest_cache/
-.venv/
-*.egg-info/
 build/
 dist/
 DerivedData/
