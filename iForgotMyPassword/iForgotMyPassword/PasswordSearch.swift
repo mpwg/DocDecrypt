@@ -198,9 +198,15 @@ final class PasswordSearch {
     private var process: Process?
     private var cancelled = false
     private let knownPasswords: KnownPasswords
+    private let runtimeID = UUID().uuidString
 
     init(knownPasswords: KnownPasswords = KnownPasswords()) {
         self.knownPasswords = knownPasswords
+    }
+
+    deinit {
+        let runtime = SearchFiles.root.appendingPathComponent("Search/Runtime-\(runtimeID)")
+        try? FileManager.default.removeItem(at: runtime)
     }
 
     func cancel() {
@@ -225,7 +231,7 @@ final class PasswordSearch {
         }
         // hashcat writes its kernel cache beside its executable. Run a private
         // copy so the signed app bundle remains immutable.
-        let runtime = try SearchFiles.privateDirectory().appendingPathComponent("Runtime")
+        let runtime = try SearchFiles.privateDirectory().appendingPathComponent("Runtime-\(runtimeID)")
         let bin = runtime.appendingPathComponent("MacOS")
         let frameworks = runtime.appendingPathComponent("Frameworks")
         try FileManager.default.createDirectory(at: bin, withIntermediateDirectories: true,
@@ -233,10 +239,7 @@ final class PasswordSearch {
         try FileManager.default.createDirectory(at: frameworks, withIntermediateDirectories: true,
                                                  attributes: [.posixPermissions: 0o700])
         let target = bin.appendingPathComponent("hashcat_bin")
-        if !FileManager.default.fileExists(atPath: target.path) ||
-            (try? target.resourceValues(forKeys: [.fileSizeKey]).fileSize) !=
-                (try? bundle.resourceValues(forKeys: [.fileSizeKey]).fileSize) {
-            try? FileManager.default.removeItem(at: target)
+        if !FileManager.default.fileExists(atPath: target.path) {
             try FileManager.default.copyItem(at: bundle, to: target)
         }
         let links: [(URL, URL)] = [
